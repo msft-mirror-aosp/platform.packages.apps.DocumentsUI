@@ -111,6 +111,7 @@ import com.android.documentsui.services.FileOperations;
 import com.android.documentsui.sorting.SortDimension;
 import com.android.documentsui.sorting.SortModel;
 
+import com.android.documentsui.util.VersionUtils;
 import com.google.common.base.Objects;
 
 import java.io.IOException;
@@ -368,7 +369,7 @@ public class DirectoryFragment extends Fragment implements SwipeRefreshLayout.On
         mRecView.setItemAnimator(new DirectoryItemAnimator());
 
         mInjector = mActivity.getInjector();
-        // Initially, this selection tracker (delegator) uses a dummy implementation, so it must be
+        // Initially, this selection tracker (delegator) uses a stub implementation, so it must be
         // updated (reset) when necessary things are ready.
         mSelectionMgr = mInjector.selectionMgr;
         mModel = mInjector.getModel();
@@ -493,7 +494,7 @@ public class DirectoryFragment extends Fragment implements SwipeRefreshLayout.On
                         this::getModelId,
                         mRecView::findChildViewUnder,
                         DocumentsApplication.getDragAndDropManager(mActivity))
-                : DragStartListener.DUMMY;
+                : DragStartListener.STUB;
 
         {
             // Limiting the scope of the localTracker so nobody uses it.
@@ -1428,8 +1429,11 @@ public class DirectoryFragment extends Fragment implements SwipeRefreshLayout.On
                 // update. We need to update the menu here to ensure the status is correct.
                 mInjector.menuManager.updateModel(mModel);
                 mInjector.menuManager.updateOptionMenu();
-
-                mActivity.updateHeaderTitle();
+                if (VersionUtils.isAtLeastS()) {
+                    mActivity.updateHeader(update.hasCrossProfileException());
+                } else {
+                    mActivity.updateHeaderTitle();
+                }
             }
         }
     }
