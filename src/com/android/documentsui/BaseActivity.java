@@ -75,6 +75,7 @@ import com.android.documentsui.sidebar.RootsFragment;
 import com.android.documentsui.sorting.SortController;
 import com.android.documentsui.sorting.SortModel;
 
+import com.android.documentsui.util.VersionUtils;
 import com.google.android.material.appbar.AppBarLayout;
 
 import java.util.ArrayList;
@@ -167,6 +168,11 @@ public abstract class BaseActivity
 
         mNavigator = new NavigationViewManager(this, mDrawer, mState, this, breadcrumb,
                 profileTabsContainer, DocumentsApplication.getUserIdManager(this));
+        AppBarLayout appBarLayout = findViewById(R.id.app_bar);
+        if (appBarLayout != null) {
+            appBarLayout.addOnOffsetChangedListener(mNavigator);
+        }
+
         SearchManagerListener searchListener = new SearchManagerListener() {
             /**
              * Called when search results changed. Refreshes the content of the directory. It
@@ -714,6 +720,20 @@ public abstract class BaseActivity
         }
     }
 
+    public void updateHeader(boolean shouldHideHeader){
+        View headerContainer = findViewById(R.id.header_container);
+        if(headerContainer == null){
+            updateHeaderTitle();
+            return;
+        }
+        if (shouldHideHeader) {
+            headerContainer.setVisibility(View.GONE);
+        } else {
+            headerContainer.setVisibility(View.VISIBLE);
+            updateHeaderTitle();
+        }
+    }
+
     public void updateHeaderTitle() {
         if (!mState.stack.isInitialized()) {
             //stack has not initialized, the header will update after the stack finishes loading
@@ -934,7 +954,7 @@ public abstract class BaseActivity
                 getMainLooper().getQueue().addIdleHandler(new IdleHandler() {
                     @Override
                     public boolean queueIdle() {
-                        // If startup benchmark is requested by a whitelisted testing package, then
+                        // If startup benchmark is requested by an allowedlist testing package, then
                         // close the activity once idle, and notify the testing activity.
                         if (getIntent().getBooleanExtra(EXTRA_BENCHMARK, false) &&
                                 BENCHMARK_TESTING_PACKAGE.equals(getCallingPackage())) {

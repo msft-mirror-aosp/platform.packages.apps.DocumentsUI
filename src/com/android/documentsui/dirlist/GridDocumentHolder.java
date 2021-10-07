@@ -89,7 +89,6 @@ final class GridDocumentHolder extends DocumentHolder {
         // But it should be an error to be set to selected && be disabled.
         if (!itemView.isEnabled()) {
             assert(!selected);
-            return;
         }
 
         super.setSelected(selected, animate);
@@ -138,12 +137,12 @@ final class GridDocumentHolder extends DocumentHolder {
 
     @Override
     public boolean inSelectRegion(MotionEvent event) {
-        return Views.isEventOver(event, mIconLayout);
+        return Views.isEventOver(event, itemView.getParent(), mIconLayout);
     }
 
     @Override
     public boolean inPreviewIconRegion(MotionEvent event) {
-        return Views.isEventOver(event, mPreviewIcon);
+        return Views.isEventOver(event, itemView.getParent(), mPreviewIcon);
     }
 
     /**
