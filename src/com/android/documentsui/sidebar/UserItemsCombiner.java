@@ -16,21 +16,16 @@
 
 package com.android.documentsui.sidebar;
 
-import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.PERSONAL_TAB;
-import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_TAB;
+import android.content.res.Resources;
 
 import static androidx.core.util.Preconditions.checkArgument;
 import static androidx.core.util.Preconditions.checkNotNull;
-
-import android.app.admin.DevicePolicyManager;
-import android.content.res.Resources;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.documentsui.R;
 import com.android.documentsui.base.State;
 import com.android.documentsui.base.UserId;
-import com.android.documentsui.util.VersionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,15 +38,13 @@ class UserItemsCombiner {
 
     private UserId mCurrentUser;
     private final Resources mResources;
-    private final DevicePolicyManager mDpm;
     private final State mState;
     private List<Item> mRootList;
     private List<Item> mRootListOtherUser;
 
-    UserItemsCombiner(Resources resources, DevicePolicyManager dpm, State state) {
+    UserItemsCombiner(Resources resources, State state) {
         mCurrentUser = UserId.CURRENT_USER;
         mResources = checkNotNull(resources);
-        mDpm = dpm;
         mState = checkNotNull(state);
     }
 
@@ -92,10 +85,9 @@ class UserItemsCombiner {
                     personalRootList = mRootListOtherUser;
                     workRootList = mRootList;
                 }
-                result.add(new HeaderItem(getEnterpriseString(
-                        PERSONAL_TAB, R.string.personal_tab)));
+                result.add(new HeaderItem(mResources.getString(R.string.personal_tab)));
                 result.addAll(personalRootList);
-                result.add(new HeaderItem(getEnterpriseString(WORK_TAB, R.string.work_tab)));
+                result.add(new HeaderItem(mResources.getString(R.string.work_tab)));
                 result.addAll(workRootList);
             } else {
                 result.addAll(mRootList);
@@ -105,13 +97,5 @@ class UserItemsCombiner {
             result.addAll(mRootList);
         }
         return result;
-    }
-
-    private String getEnterpriseString(String updatableStringId, int defaultStringId) {
-        if (VersionUtils.isAtLeastT()) {
-            return mDpm.getString(updatableStringId, () -> mResources.getString(defaultStringId));
-        } else {
-            return mResources.getString(defaultStringId);
-        }
     }
 }
