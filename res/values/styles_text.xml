@@ -19,13 +19,6 @@
         <item name="android:textSize">11sp</item>
     </style>
 
-    <style name="SectionHeader" parent="@android:style/TextAppearance.Material.Medium">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="fontFamily">@string/config_fontFamilyMedium</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
     <style name="SortList" parent="@style/TextAppearance.AppCompat.Subhead">
         <item name="android:textColor">@color/sort_list_text</item>
         <item name="fontFamily">@string/config_fontFamilyMedium</item>
@@ -60,7 +53,6 @@
     <style name="CardPrimaryText" parent="@style/TextAppearance.AppCompat.Subhead">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
-        <item name="fontFamily">@string/config_fontFamily</item>
     </style>
 
     <style name="ActionModeTitle" parent="@style/ToolbarTitle">
@@ -92,7 +84,6 @@
     <style name="DrawerMenuSecondary" parent="android:style/TextAppearance.Material.Body2">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/item_root_secondary_text</item>
-        <item name="fontFamily">@string/config_fontFamily</item>
     </style>
 
     <style name="InspectorKeySubTitle" parent="@style/TextAppearance.MaterialComponents.Subtitle1">
@@ -111,13 +102,13 @@
     </style>
 
     <style name="EmptyStateTitleText">
-        <item name="android:textColor">@color/empty_state_text_color</item>
+        <item name="android:textColor">@color/empty_state_text</item>
         <item name="android:textSize">14sp</item>
         <item name="fontFamily">@string/config_fontFamilyMedium</item>
     </style>
 
     <style name="EmptyStateMessageText">
-        <item name="android:textColor">@color/empty_state_text_color</item>
+        <item name="android:textColor">@color/empty_state_text</item>
         <item name="android:textSize">12sp</item>
     </style>
 
@@ -127,26 +118,17 @@
         <item name="fontFamily">@string/config_fontFamilyMedium</item>
     </style>
 
-    <style name="TabTextAppearance" parent="@android:style/TextAppearance.Material.Medium">
+    <style name="TabTextAppearance" parent="@android:style/TextAppearance.DeviceDefault.Medium">
         <item name="android:textSize">14sp</item>
         <item name="fontFamily">@string/config_fontFamilyMedium</item>
     </style>
 
-    <style name="ItemCaptionText" parent="@android:style/TextAppearance.Material.Caption">
+    <style name="ItemDocListCaptionText" parent="@android:style/TextAppearance.Material.Caption">
         <item name="android:textColor">@color/doc_list_item_subtitle_color</item>
-        <item name="fontFamily">@string/config_fontFamily</item>
     </style>
 
-    <style name="MenuItemTextAppearance" parent="@android:style/TextAppearance.Material.Body2">
+    <style name="MenuItemTextAppearance" parent="*android:style/TextAppearance.DeviceDefault.Body2">
         <item name="android:textSize">14sp</item>
-        <item name="fontFamily">@string/config_fontFamily</item>
-    </style>
-
-    <style name="Subhead" parent="@android:style/TextAppearance.Material.Subhead">
-        <item name="fontFamily">@string/config_fontFamily</item>
-    </style>
-
-    <style name="Body1" parent="@android:style/TextAppearance.Material.Body1">
         <item name="fontFamily">@string/config_fontFamily</item>
     </style>
 

@@ -25,7 +25,7 @@ import com.android.documentsui.R;
 import com.android.documentsui.base.UserId;
 
 /**
- * Stub {@link Item} for dividers between different types of {@link Item}s.
+ * Dummy {@link Item} for dividers between different types of {@link Item}s.
  */
 class SpacerItem extends Item {
     private static final String TAG = "SpacerItem";
