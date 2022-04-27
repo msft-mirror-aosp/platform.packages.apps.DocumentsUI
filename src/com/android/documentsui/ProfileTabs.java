@@ -16,21 +16,23 @@
 
 package com.android.documentsui;
 
-import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.PERSONAL_TAB;
-import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_TAB;
-
 import static androidx.core.util.Preconditions.checkNotNull;
 
+import static com.android.documentsui.DevicePolicyResources.Strings.PERSONAL_TAB;
+import static com.android.documentsui.DevicePolicyResources.Strings.WORK_TAB;
+
 import android.app.admin.DevicePolicyManager;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.android.documentsui.base.RootInfo;
 import com.android.documentsui.base.State;
 import com.android.documentsui.base.UserId;
-import com.android.documentsui.util.VersionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.common.base.Objects;
@@ -106,7 +108,7 @@ public class ProfileTabs implements ProfileTabsAddons {
         mTabsContainer.setVisibility(shouldShow() ? View.VISIBLE : View.GONE);
 
         // Material next changes apply only for version S or greater
-        if(VersionUtils.isAtLeastS()) {
+        if (SdkLevel.isAtLeastS()) {
             mTabSeparator.setVisibility(View.GONE);
             int tabContainerHeightInDp = (int)mTabsContainer.getContext().getResources().
                 getDimension(R.dimen.tab_container_height);
@@ -163,15 +165,20 @@ public class ProfileTabs implements ProfileTabsAddons {
     }
 
     private String getEnterpriseString(String updatableStringId, int defaultStringId) {
-        if (VersionUtils.isAtLeastT()) {
-            DevicePolicyManager dpm = mTabsContainer.getContext().getSystemService(
-                    DevicePolicyManager.class);
-            return dpm.getString(
-                    updatableStringId,
-                    () -> mTabsContainer.getContext().getString(defaultStringId));
+        if (SdkLevel.isAtLeastT()) {
+            return getUpdatableEnterpriseString(updatableStringId, defaultStringId);
         } else {
             return mTabsContainer.getContext().getString(defaultStringId);
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private String getUpdatableEnterpriseString(String updatableStringId, int defaultStringId) {
+        DevicePolicyManager dpm = mTabsContainer.getContext().getSystemService(
+                DevicePolicyManager.class);
+        return dpm.getResources().getString(
+                updatableStringId,
+                () -> mTabsContainer.getContext().getString(defaultStringId));
     }
 
     /**
