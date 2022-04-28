@@ -16,21 +16,23 @@
 
 package com.android.documentsui.sidebar;
 
-import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.PERSONAL_TAB;
-import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_TAB;
-
 import static androidx.core.util.Preconditions.checkArgument;
 import static androidx.core.util.Preconditions.checkNotNull;
 
+import static com.android.documentsui.DevicePolicyResources.Strings.PERSONAL_TAB;
+import static com.android.documentsui.DevicePolicyResources.Strings.WORK_TAB;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.res.Resources;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.documentsui.R;
 import com.android.documentsui.base.State;
 import com.android.documentsui.base.UserId;
-import com.android.documentsui.util.VersionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,10 +110,16 @@ class UserItemsCombiner {
     }
 
     private String getEnterpriseString(String updatableStringId, int defaultStringId) {
-        if (VersionUtils.isAtLeastT()) {
-            return mDpm.getString(updatableStringId, () -> mResources.getString(defaultStringId));
+        if (SdkLevel.isAtLeastT()) {
+            return getUpdatableEnterpriseString(updatableStringId, defaultStringId);
         } else {
             return mResources.getString(defaultStringId);
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private String getUpdatableEnterpriseString(String updatableStringId, int defaultStringId) {
+        return mDpm.getResources().getString(
+                updatableStringId, () -> mResources.getString(defaultStringId));
     }
 }
