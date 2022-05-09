@@ -16,9 +16,8 @@
 
 package com.android.documentsui.dirlist;
 
-import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
-import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
-
+import static com.android.documentsui.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static com.android.documentsui.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
 import static com.android.documentsui.base.DocumentInfo.getCursorString;
 
 import android.app.admin.DevicePolicyManager;
@@ -40,7 +39,7 @@ import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
 import com.android.documentsui.base.State;
 import com.android.documentsui.ui.Views;
-import com.android.documentsui.util.VersionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 final class GridDirectoryHolder extends DocumentHolder {
 
@@ -62,7 +61,7 @@ final class GridDirectoryHolder extends DocumentHolder {
         mIconMime.setImageDrawable(
                 IconUtils.loadMimeIcon(context, DocumentsContract.Document.MIME_TYPE_DIR));
 
-        if (VersionUtils.isAtLeastT()) {
+        if (SdkLevel.isAtLeastT()) {
             setUpdatableWorkProfileIcon(context);
         }
     }
@@ -70,7 +69,7 @@ final class GridDirectoryHolder extends DocumentHolder {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private void setUpdatableWorkProfileIcon(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        Drawable drawable = dpm.getDrawable(WORK_PROFILE_ICON, SOLID_COLORED, () ->
+        Drawable drawable = dpm.getResources().getDrawable(WORK_PROFILE_ICON, SOLID_COLORED, () ->
                 context.getDrawable(R.drawable.ic_briefcase));
         mIconBriefcase.setImageDrawable(drawable);
     }
