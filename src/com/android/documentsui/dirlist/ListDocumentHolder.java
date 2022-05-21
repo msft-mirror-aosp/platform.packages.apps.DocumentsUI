@@ -48,7 +48,7 @@ import com.android.documentsui.base.State;
 import com.android.documentsui.base.UserId;
 import com.android.documentsui.roots.RootCursorWrapper;
 import com.android.documentsui.ui.Views;
-import com.android.documentsui.util.VersionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -98,7 +98,7 @@ final class ListDocumentHolder extends DocumentHolder {
         mFileTypeLookup = fileTypeLookup;
         mDoc = new DocumentInfo();
 
-        if (VersionUtils.isAtLeastT()) {
+        if (SdkLevel.isAtLeastT()) {
             setUpdatableWorkProfileIcon(context);
         }
     }
@@ -198,12 +198,12 @@ final class ListDocumentHolder extends DocumentHolder {
     @Override
     public boolean inSelectRegion(MotionEvent event) {
         return (mDoc.isDirectory() && !(mAction == State.ACTION_BROWSE)) ?
-                false : Views.isEventOver(event, itemView.getParent(), mIconLayout);
+                false : Views.isEventOver(event, mIconLayout);
     }
 
     @Override
     public boolean inPreviewIconRegion(MotionEvent event) {
-        return Views.isEventOver(event, itemView.getParent(), mPreviewIcon);
+        return Views.isEventOver(event, mPreviewIcon);
     }
 
     /**

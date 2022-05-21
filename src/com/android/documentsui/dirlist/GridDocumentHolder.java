@@ -43,7 +43,7 @@ import com.android.documentsui.base.Shared;
 import com.android.documentsui.base.UserId;
 import com.android.documentsui.roots.RootCursorWrapper;
 import com.android.documentsui.ui.Views;
-import com.android.documentsui.util.VersionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.function.Function;
 
@@ -80,7 +80,7 @@ final class GridDocumentHolder extends DocumentHolder {
 
         mIconHelper = iconHelper;
 
-        if (VersionUtils.isAtLeastT()) {
+        if (SdkLevel.isAtLeastT()) {
             setUpdatableWorkProfileIcon(context);
         }
     }
@@ -156,12 +156,12 @@ final class GridDocumentHolder extends DocumentHolder {
 
     @Override
     public boolean inSelectRegion(MotionEvent event) {
-        return Views.isEventOver(event, itemView.getParent(), mIconLayout);
+        return Views.isEventOver(event, mIconLayout);
     }
 
     @Override
     public boolean inPreviewIconRegion(MotionEvent event) {
-        return Views.isEventOver(event, itemView.getParent(), mPreviewIcon);
+        return Views.isEventOver(event, mPreviewIcon);
     }
 
     /**

@@ -39,7 +39,7 @@ import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
 import com.android.documentsui.base.State;
 import com.android.documentsui.ui.Views;
-import com.android.documentsui.util.VersionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 final class GridDirectoryHolder extends DocumentHolder {
 
@@ -61,7 +61,7 @@ final class GridDirectoryHolder extends DocumentHolder {
         mIconMime.setImageDrawable(
                 IconUtils.loadMimeIcon(context, DocumentsContract.Document.MIME_TYPE_DIR));
 
-        if (VersionUtils.isAtLeastT()) {
+        if (SdkLevel.isAtLeastT()) {
             setUpdatableWorkProfileIcon(context);
         }
     }
@@ -101,8 +101,7 @@ final class GridDirectoryHolder extends DocumentHolder {
 
     @Override
     public boolean inSelectRegion(MotionEvent event) {
-        return mAction == State.ACTION_BROWSE ? Views.isEventOver(event, itemView.getParent(),
-                mIconLayout) : false;
+        return mAction == State.ACTION_BROWSE ? Views.isEventOver(event, mIconLayout) : false;
     }
 
     /**
