@@ -280,7 +280,7 @@ public class InspectorControllerTest  {
         assertNotNull(geoIntent);
         Uri uri = geoIntent.getData();
         assertEquals("geo", uri.getScheme());
-        String strUri = uri.toString();
+        String strUri = uri.toSafeString();
         assertTrue(strUri.contains("33."));
         assertTrue(strUri.contains("-118."));
         assertTrue(strUri.contains(TestEnv.FILE_JPG.displayName));

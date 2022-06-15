@@ -29,8 +29,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.support.test.uiautomator.UiDevice;
-import android.view.KeyEvent;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.test.filters.LargeTest;
@@ -77,10 +75,6 @@ public class DialogUiTest {
         mFileActivityIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         mFragmentManager = mActivityTestRule.getActivity().getSupportFragmentManager();
         mScreenDensitySession = new ScreenDensitySession();
-
-        final UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        device.pressKeyCode(KeyEvent.KEYCODE_WAKEUP);
-        device.pressKeyCode(KeyEvent.KEYCODE_MENU);
     }
 
     @After
