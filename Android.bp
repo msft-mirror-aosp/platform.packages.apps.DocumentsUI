@@ -70,7 +70,7 @@ java_defaults {
     },
 
     sdk_version: "system_current",
-    target_sdk_version: "30",
+    target_sdk_version: "33",
     min_sdk_version: "29",
 
     plugins: [
@@ -125,7 +125,7 @@ android_library {
     ],
 
     sdk_version: "system_current",
-    target_sdk_version: "30",
+    target_sdk_version: "33",
     min_sdk_version: "29",
 }
 
@@ -149,7 +149,7 @@ android_library {
     ],
 
     sdk_version: "system_current",
-    target_sdk_version: "30",
+    target_sdk_version: "33",
     min_sdk_version: "29",
 }
 
@@ -170,6 +170,6 @@ android_app {
 
     required: ["privapp_whitelist_com.android.documentsui"],
 
-    target_sdk_version: "30",
+    target_sdk_version: "33",
     min_sdk_version: "29",
 }
