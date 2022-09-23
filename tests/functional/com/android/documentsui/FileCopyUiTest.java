@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.text.TextUtils;
@@ -41,6 +42,7 @@ import com.android.documentsui.base.RootInfo;
 import com.android.documentsui.files.FilesActivity;
 import com.android.documentsui.filters.HugeLongTest;
 import com.android.documentsui.services.TestNotificationService;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,6 +133,10 @@ public class FileCopyUiTest extends ActivityTest<FilesActivity> {
         mPreTestStayAwakeValue = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
         device.executeShellCommand("settings put global stay_on_while_plugged_in 3");
+
+        if (SdkLevel.isAtLeastR()) {
+            MediaStore.waitForIdle(context.getContentResolver());
+        }
 
         mDeviceLabel = Settings.Global.getString(context.getContentResolver(),
                 Settings.Global.DEVICE_NAME);
