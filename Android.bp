@@ -59,9 +59,6 @@ java_defaults {
     sdk_version: "system_current",
     min_sdk_version: "29",
 
-    plugins: [
-        "java_api_finder",
-    ],
     lint: { strict_updatability_linting: true }
 }
 
