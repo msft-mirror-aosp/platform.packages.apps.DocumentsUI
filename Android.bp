@@ -53,15 +53,13 @@ java_defaults {
     certificate: "platform",
 
     optimize: {
+        shrink_resources: true,
         proguard_flags_files: ["proguard.flags"],
     },
 
     sdk_version: "system_current",
     min_sdk_version: "29",
 
-    plugins: [
-        "java_api_finder",
-    ],
     lint: { strict_updatability_linting: true }
 }
 
