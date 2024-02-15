@@ -29,7 +29,6 @@ import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
 
 import androidx.test.filters.MediumTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.documentsui.base.DocumentInfo;
 import com.android.documentsui.base.State;
@@ -41,22 +40,40 @@ import com.android.documentsui.testing.TestFileTypeLookup;
 import com.android.documentsui.testing.TestImmediateExecutor;
 import com.android.documentsui.testing.TestProvidersAccess;
 import com.android.documentsui.testing.UserManagers;
+import com.android.modules.utils.build.SdkLevel;
+
+import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 @MediumTest
 public class RecentsLoaderTests {
 
     private TestEnv mEnv;
     private TestActivity mActivity;
     private RecentsLoader mLoader;
-    private boolean mContentChanged;
+    private TestConfigStore mTestConfigStore;
+
+    @Parameter(0)
+    public boolean isPrivateSpaceEnabled;
+
+    /**
+     * Parameterized test to run all the tests in this class twice, once with private space enabled
+     * and once with private space disabled.
+     */
+    @Parameters(name = "privateSpaceEnabled={0}")
+    public static Iterable<?> data() {
+        return Lists.newArrayList(true, false);
+    }
 
     @Before
     public void setUp() {
@@ -64,14 +81,23 @@ public class RecentsLoaderTests {
         mActivity = TestActivity.create(mEnv);
         mActivity.activityManager = ActivityManagers.create(false);
         mActivity.userManager = UserManagers.create();
+        mTestConfigStore = new TestConfigStore();
+        mEnv.state.configStore = mTestConfigStore;
 
         mEnv.state.action = State.ACTION_BROWSE;
-        mEnv.state.acceptMimes = new String[] { "*/*" };
-        mEnv.state.canShareAcrossProfile = true;
+        mEnv.state.acceptMimes = new String[]{"*/*"};
+        isPrivateSpaceEnabled = SdkLevel.isAtLeastS() && isPrivateSpaceEnabled;
+        if (isPrivateSpaceEnabled) {
+            mTestConfigStore.enablePrivateSpaceInPhotoPicker();
+            mEnv.state.canForwardToProfileIdMap.put(UserId.DEFAULT_USER, true);
+            mEnv.state.canForwardToProfileIdMap.put(TestProvidersAccess.OtherUser.USER_ID, true);
+        } else {
+            mEnv.state.canShareAcrossProfile = true;
+        }
 
         mLoader = new RecentsLoader(mActivity, mEnv.providers, mEnv.state,
                 TestImmediateExecutor.createLookup(), new TestFileTypeLookup(),
-                UserId.DEFAULT_USER);
+                TestProvidersAccess.USER_ID);
     }
 
     @Test
@@ -114,7 +140,7 @@ public class RecentsLoaderTests {
         mEnv.mockProviders.get(TestProvidersAccess.HOME.authority)
                 .setNextRecentDocumentsReturns(doc1, doc2);
 
-        assertEquals(false, mLoader.mState.showHiddenFiles);
+        assertFalse(mLoader.mState.showHiddenFiles);
         DirectoryResult result = mLoader.loadInBackground();
         assertEquals(0, result.getCursor().getCount());
 
@@ -148,12 +174,13 @@ public class RecentsLoaderTests {
 
     @Test
     public void testContentsUpdate_observable() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        Runnable callback = () -> {
-            latch.countDown();
-            mContentChanged = true;
-        };
-        mLoader.setObserver(new LockingContentObserver(new ContentLock(), callback));
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        // Please be mindful of the fact that the callback will be invoked on the Main (aka UI)
+        // thread, while the test itself is running on another (dedicated) thread.
+        final Runnable onContentChangedCallback = latch::countDown;
+        mLoader.setObserver(new LockingContentObserver(
+                new ContentLock(), onContentChangedCallback));
 
         final DocumentInfo doc = mEnv.model.createFile("freddy.jpg");
         doc.lastModified = System.currentTimeMillis();
@@ -162,17 +189,21 @@ public class RecentsLoaderTests {
 
         mLoader.loadInBackground();
 
-        TestCursor c = (TestCursor) mEnv.mockProviders.get(TestProvidersAccess.HOME.authority)
+        final TestCursor c = (TestCursor) mEnv.mockProviders.get(TestProvidersAccess.HOME.authority)
                 .queryRecentDocuments(null, null);
         c.mockOnChange();
 
-        latch.await(1, TimeUnit.SECONDS);
-        assertTrue(mContentChanged);
+        final boolean onContentChangedCallbackInvoked = latch.await(1, TimeUnit.SECONDS);
+        assertTrue(onContentChangedCallbackInvoked);
     }
 
     @Test
     public void testLoaderOnUserWithoutPermission() {
-        mEnv.state.canShareAcrossProfile = false;
+        if (isPrivateSpaceEnabled) {
+            mEnv.state.canForwardToProfileIdMap.put(TestProvidersAccess.OtherUser.USER_ID, false);
+        } else {
+            mEnv.state.canShareAcrossProfile = false;
+        }
         mLoader = new RecentsLoader(mActivity, mEnv.providers, mEnv.state,
                 TestImmediateExecutor.createLookup(), new TestFileTypeLookup(),
                 TestProvidersAccess.OtherUser.USER_ID);

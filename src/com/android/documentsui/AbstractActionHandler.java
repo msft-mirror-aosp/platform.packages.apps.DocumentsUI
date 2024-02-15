@@ -119,6 +119,7 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
     public void registerDisplayStateChangedListener(Runnable l) {
         mDisplayStateChangedListener = l;
     }
+
     @Override
     public void unregisterDisplayStateChangedListener(Runnable l) {
         if (mDisplayStateChangedListener == l) {
@@ -135,12 +136,12 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
             Lookup<String, Executor> executors,
             Injector<?> injector) {
 
-        assert(activity != null);
-        assert(state != null);
-        assert(providers != null);
-        assert(searchMgr != null);
-        assert(docs != null);
-        assert(injector != null);
+        assert (activity != null);
+        assert (state != null);
+        assert (providers != null);
+        assert (searchMgr != null);
+        assert (docs != null);
+        assert (injector != null);
 
         mActivity = activity;
         mState = state;
@@ -359,7 +360,7 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
 
     @Override
     public void openContainerDocument(DocumentInfo doc) {
-        assert(doc.isContainer());
+        assert (doc.isContainer());
 
         if (mSearchMgr.isSearching()) {
             loadDocument(
@@ -372,6 +373,7 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
     }
 
     // TODO: Make this private and make tests call interface method instead.
+
     /**
      * Behavior when a document is opened.
      */
@@ -620,7 +622,7 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
             currentDoc = mDocs.getArchiveDocument(doc.derivedUri, doc.userId);
         }
 
-        assert(currentDoc != null);
+        assert (currentDoc != null);
         if (currentDoc.equals(mState.stack.peek())) {
             Log.w(TAG, "This DocumentInfo is already in current DocumentsStack");
             return;
@@ -676,8 +678,8 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
             ComponentName component = new ComponentName(
                     mActivity.getPackageName(), Shared.LAUNCHER_TARGET_CLASS);
             pm.setComponentEnabledSetting(component, enalbled
-                    ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                    : PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                            ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                            : PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                     PackageManager.DONT_KILL_APP);
         }
     }
@@ -714,7 +716,7 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
                 mDocs,
                 userId,
                 callback
-                ).executeOnExecutor(mExecutors.lookup(uri.getAuthority()), uri);
+        ).executeOnExecutor(mExecutors.lookup(uri.getAuthority()), uri);
     }
 
     @Override
@@ -779,39 +781,55 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
     }
 
     protected final boolean launchToDocument(Uri uri) {
-        // We don't support launching to a document in an archive.
-        if (!Providers.isArchiveUri(uri)) {
-            loadDocument(uri, UserId.DEFAULT_USER, this::onStackLoaded);
-            return true;
+        if (DEBUG) {
+            Log.d(TAG, "launchToDocument() uri=" + uri);
         }
 
-        return false;
+        // We don't support launching to a document in an archive.
+        if (Providers.isArchiveUri(uri)) {
+            return false;
+        }
+
+        loadDocument(uri, UserId.DEFAULT_USER, this::onStackToLaunchToLoaded);
+        return true;
     }
 
-    private void onStackLoaded(@Nullable DocumentStack stack) {
-        if (stack != null) {
-            if (!stack.peek().isDirectory()) {
-                // Requested document is not a directory. Pop it so that we can launch into its
-                // parent.
-                stack.pop();
-            }
-            mState.stack.reset(stack);
-            mActivity.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
+    /**
+     * Invoked <b>only</b> once, when the initial stack (that is the stack we are going to
+     * "launch to") is loaded.
+     *
+     * @see #launchToDocument(Uri)
+     */
+    private void onStackToLaunchToLoaded(@Nullable DocumentStack stack) {
+        if (DEBUG) {
+            Log.d(TAG, "onLaunchStackLoaded() stack=" + stack);
+        }
 
-            Metrics.logLaunchAtLocation(mState, stack.getRoot().getUri());
-        } else {
+        if (stack == null) {
             Log.w(TAG, "Failed to launch into the given uri. Launch to default location.");
             launchToDefaultLocation();
 
             Metrics.logLaunchAtLocation(mState, null);
+            return;
         }
+
+        // Make sure the document at the top of the stack is a directory (if it isn't - just pop
+        // one off).
+        if (!stack.peek().isDirectory()) {
+            stack.pop();
+        }
+
+        mState.stack.reset(stack);
+        mActivity.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
+
+        Metrics.logLaunchAtLocation(mState, stack.getRoot().getUri());
     }
 
     private void onRootLoaded(@Nullable RootInfo root) {
         boolean invalidRootForAction =
                 (root != null
-                && !root.supportsChildren()
-                && mState.action == State.ACTION_OPEN_TREE);
+                        && !root.supportsChildren()
+                        && mState.action == State.ACTION_OPEN_TREE);
 
         if (invalidRootForAction) {
             loadDeviceRoot();
@@ -926,8 +944,8 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
 
                 if (DEBUG) {
                     Log.d(TAG,
-                        "Creating new directory loader for: "
-                            + DocumentInfo.debugString(mState.stack.peek()));
+                            "Creating new directory loader for: "
+                                    + DocumentInfo.debugString(mState.stack.peek()));
                 }
 
                 return new DirectoryLoader(
@@ -945,9 +963,9 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
         public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
             if (DEBUG) {
                 Log.d(TAG, "Loader has finished for: "
-                    + DocumentInfo.debugString(mState.stack.peek()));
+                        + DocumentInfo.debugString(mState.stack.peek()));
             }
-            assert(result != null);
+            assert (result != null);
 
             mInjector.getModel().update(result);
             mLoaderSemaphore.release();
@@ -958,24 +976,34 @@ public abstract class AbstractActionHandler<T extends FragmentActivity & CommonA
             mLoaderSemaphore.release();
         }
     }
+
     /**
      * A class primarily for the support of isolating our tests
      * from our concrete activity implementations.
      */
     public interface CommonAddons {
         void restoreRootAndDirectory();
+
         void refreshCurrentRootAndDirectory(@AnimationType int anim);
+
         void onRootPicked(RootInfo root);
+
         // TODO: Move this to PickAddons as multi-document picking is exclusive to that activity.
         void onDocumentsPicked(List<DocumentInfo> docs);
+
         void onDocumentPicked(DocumentInfo doc);
+
         RootInfo getCurrentRoot();
+
         DocumentInfo getCurrentDirectory();
+
         UserId getSelectedUser();
+
         /**
          * Check whether current directory is root of recent.
          */
         boolean isInRecents();
+
         void setRootsDrawerOpen(boolean open);
 
         /**
