@@ -153,12 +153,14 @@ final class GridDocumentHolder extends DocumentHolder {
     }
 
     @Override
+    @RequiresApi(Build.VERSION_CODES.S)
     public void bindProfileIcon(boolean show, int userIdIdentifier) {
         Map<UserId, Drawable> userIdToBadgeMap = DocumentsApplication.getUserManagerState(
                 mContext).getUserIdToBadgeMap();
         Drawable drawable = userIdToBadgeMap.get(UserId.of(userIdIdentifier));
         mIconBadge.setImageDrawable(drawable);
         mIconBadge.setVisibility(show ? View.VISIBLE : View.GONE);
+        mIconBadge.setContentDescription(mIconHelper.getProfileLabel(userIdIdentifier));
     }
 
     @Override

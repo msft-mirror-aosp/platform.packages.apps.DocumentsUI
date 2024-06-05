@@ -25,7 +25,6 @@ java_defaults {
     ],
 
     static_libs: [
-        "DocumentsUI-lib",
         "androidx.test.rules",
         "androidx.test.espresso.core",
         "androidx.test.ext.truth",
@@ -70,12 +69,16 @@ android_library {
         "unit/**/*.java",
     ],
 
+    libs: [
+        "DocumentsUI-lib",
+    ],
+
     resource_dirs: [
         "res",
     ],
 
-    min_sdk_version : "29",
-    target_sdk_version : "29",
+    min_sdk_version: "29",
+    target_sdk_version: "29",
 }
 
 android_library {
@@ -88,6 +91,10 @@ android_library {
         "common/**/*.java",
         "functional/**/*.java",
         "unit/**/*.java",
+    ],
+
+    libs: [
+        "DocumentsUI-lib",
     ],
 
     asset_dirs: [
@@ -103,8 +110,11 @@ android_library {
         "-0 .zip",
     ],
 
-    min_sdk_version : "29",
-    target_sdk_version : "29",
+    min_sdk_version: "29",
+    target_sdk_version: "29",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 android_test {
@@ -131,6 +141,6 @@ android_test {
     certificate: "platform",
 
     instrumentation_for: "DocumentsUI",
-    min_sdk_version : "29",
-    target_sdk_version : "29",
+    min_sdk_version: "29",
+    target_sdk_version: "29",
 }
