@@ -95,6 +95,9 @@ public class ProvidersCache implements ProvidersAccess, LookupApplicationName {
             // ArchivesProvider doesn't support any roots.
             ArchivesProvider.AUTHORITY);
     private static final int FIRST_LOAD_TIMEOUT_MS = 5000;
+    private static final int NUM_THREADS = 10;
+    private static final ExecutorService FIXED_THREAD_POOL =
+            Executors.newFixedThreadPool(NUM_THREADS);
 
     private final Context mContext;
 
@@ -562,8 +565,7 @@ public class ProvidersCache implements ProvidersAccess, LookupApplicationName {
 
             if (!taskInfos.isEmpty()) {
                 CountDownLatch updateTaskInternalCountDown = new CountDownLatch(taskInfos.size());
-                ExecutorService executor = MoreExecutors.getExitingExecutorService(
-                        (ThreadPoolExecutor) Executors.newCachedThreadPool());
+                ExecutorService executor = FIXED_THREAD_POOL;
                 for (SingleProviderUpdateTaskInfo taskInfo : taskInfos) {
                     executor.submit(() ->
                             startSingleProviderUpdateTask(
