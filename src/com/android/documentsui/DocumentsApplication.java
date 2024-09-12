@@ -162,6 +162,16 @@ public class DocumentsApplication extends Application {
         ((DocumentsApplication) context.getApplicationContext()).mUserManagerState = null;
     }
 
+    /**
+     * Set {@link #sConfigStore} as null onDestroy of BaseActivity so that new session uses new
+     * instance of {@link #sConfigStore}
+     */
+    public static void invalidateConfigStore() {
+        synchronized (DocumentsApplication.class) {
+            sConfigStore = null;
+        }
+    }
+
     private void onApplyOverlayFinish(boolean result) {
         Log.d(TAG, "OverlayManager.setEnabled() result: " + result);
     }

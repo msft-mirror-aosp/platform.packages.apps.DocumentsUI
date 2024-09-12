@@ -456,6 +456,7 @@ public abstract class BaseActivity
         mPreferencesMonitor.stop();
         mSortController.destroy();
         DocumentsApplication.invalidateUserManagerState(this);
+        DocumentsApplication.invalidateConfigStore();
         super.onDestroy();
     }
 
