@@ -127,7 +127,8 @@ public class DocumentsApplication extends Application {
     public static UserManagerState getUserManagerState(Context context) {
         UserManagerState userManagerState =
                 ((DocumentsApplication) context.getApplicationContext()).mUserManagerState;
-        if (userManagerState == null && getConfigStore().isPrivateSpaceInDocsUIEnabled()) {
+        if (userManagerState == null && getConfigStore().isPrivateSpaceInDocsUIEnabled()
+                && SdkLevel.isAtLeastS()) {
             userManagerState = UserManagerState.create(context);
             ((DocumentsApplication) context.getApplicationContext()).mUserManagerState =
                     userManagerState;
@@ -159,16 +160,6 @@ public class DocumentsApplication extends Application {
      */
     public static void invalidateUserManagerState(Context context) {
         ((DocumentsApplication) context.getApplicationContext()).mUserManagerState = null;
-    }
-
-    /**
-     * Set {@link #sConfigStore} as null onDestroy of BaseActivity so that new session uses new
-     * instance of {@link #sConfigStore}
-     */
-    public static void invalidateConfigStore() {
-        synchronized (DocumentsApplication.class) {
-            sConfigStore = null;
-        }
     }
 
     private void onApplyOverlayFinish(boolean result) {
@@ -264,7 +255,7 @@ public class DocumentsApplication extends Application {
             } else if (PROFILE_FILTER_ACTIONS.contains(action)) {
                 // Make the changes to UserManagerState object before calling providers updateAsync
                 // so that providers for all the users are loaded
-                if (getConfigStore().isPrivateSpaceInDocsUIEnabled()) {
+                if (getConfigStore().isPrivateSpaceInDocsUIEnabled() && SdkLevel.isAtLeastV()) {
                     UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER);
                     UserId userId = UserId.of(userHandle);
                     getUserManagerState(context).onProfileActionStatusChange(action, userId);
