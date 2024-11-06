@@ -172,6 +172,10 @@ public abstract class BaseActivity
         // Record the time when onCreate is invoked for metric.
         mStartTime = new Date().getTime();
 
+        if (SdkLevel.isAtLeastS()) {
+            getWindow().setHideOverlayWindows(true);
+        }
+
         // ToDo Create tool to check resource version before applyStyle for the theme
         // If version code is not match, we should reset overlay package to default,
         // in case Activity continueusly encounter resource not found exception
@@ -264,11 +268,11 @@ public abstract class BaseActivity
 
             @Override
             public void onSearchViewFocusChanged(boolean hasFocus) {
-                final boolean isInitailSearch
+                final boolean isInitialSearch
                         = !TextUtils.isEmpty(mSearchManager.getCurrentSearch())
                         && TextUtils.isEmpty(mSearchManager.getSearchViewText());
                 if (hasFocus) {
-                    if (!isInitailSearch) {
+                    if (!isInitialSearch) {
                         SearchFragment.showFragment(getSupportFragmentManager(),
                                 mSearchManager.getSearchViewText());
                     }
