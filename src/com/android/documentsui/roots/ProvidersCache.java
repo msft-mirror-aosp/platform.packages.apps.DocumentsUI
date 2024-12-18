@@ -58,10 +58,10 @@ import com.android.documentsui.base.Providers;
 import com.android.documentsui.base.RootInfo;
 import com.android.documentsui.base.State;
 import com.android.documentsui.base.UserId;
+import com.android.modules.utils.build.SdkLevel;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,7 +75,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -94,6 +93,9 @@ public class ProvidersCache implements ProvidersAccess, LookupApplicationName {
             // ArchivesProvider doesn't support any roots.
             ArchivesProvider.AUTHORITY);
     private static final int FIRST_LOAD_TIMEOUT_MS = 5000;
+    private static final int NUM_THREADS = 10;
+    private static final ExecutorService ASYNC_TASKS_THREAD_POOL =
+            Executors.newFixedThreadPool(NUM_THREADS);
 
     private final Context mContext;
 
@@ -561,8 +563,7 @@ public class ProvidersCache implements ProvidersAccess, LookupApplicationName {
 
             if (!taskInfos.isEmpty()) {
                 CountDownLatch updateTaskInternalCountDown = new CountDownLatch(taskInfos.size());
-                ExecutorService executor = MoreExecutors.getExitingExecutorService(
-                        (ThreadPoolExecutor) Executors.newCachedThreadPool());
+                ExecutorService executor = ASYNC_TASKS_THREAD_POOL;
                 for (SingleProviderUpdateTaskInfo taskInfo : taskInfos) {
                     executor.submit(() ->
                             startSingleProviderUpdateTask(
@@ -705,7 +706,8 @@ public class ProvidersCache implements ProvidersAccess, LookupApplicationName {
     }
 
     private List<UserId> getUserIds() {
-        if (DocumentsApplication.getConfigStore().isPrivateSpaceInDocsUIEnabled()) {
+        if (DocumentsApplication.getConfigStore().isPrivateSpaceInDocsUIEnabled()
+                && SdkLevel.isAtLeastS()) {
             return DocumentsApplication.getUserManagerState(mContext).getUserIds();
         }
         return DocumentsApplication.getUserIdManager(mContext).getUserIds();

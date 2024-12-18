@@ -75,6 +75,7 @@ import com.android.documentsui.roots.ProvidersCache;
 import com.android.documentsui.sidebar.RootsFragment;
 import com.android.documentsui.sorting.SortController;
 import com.android.documentsui.sorting.SortModel;
+import com.android.modules.utils.build.SdkLevel;
 
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -171,6 +172,10 @@ public abstract class BaseActivity
         // Record the time when onCreate is invoked for metric.
         mStartTime = new Date().getTime();
 
+        if (SdkLevel.isAtLeastS()) {
+            getWindow().setHideOverlayWindows(true);
+        }
+
         // ToDo Create tool to check resource version before applyStyle for the theme
         // If version code is not match, we should reset overlay package to default,
         // in case Activity continueusly encounter resource not found exception
@@ -263,11 +268,11 @@ public abstract class BaseActivity
 
             @Override
             public void onSearchViewFocusChanged(boolean hasFocus) {
-                final boolean isInitailSearch
+                final boolean isInitialSearch
                         = !TextUtils.isEmpty(mSearchManager.getCurrentSearch())
                         && TextUtils.isEmpty(mSearchManager.getSearchViewText());
                 if (hasFocus) {
-                    if (!isInitailSearch) {
+                    if (!isInitialSearch) {
                         SearchFragment.showFragment(getSupportFragmentManager(),
                                 mSearchManager.getSearchViewText());
                     }
@@ -307,7 +312,7 @@ public abstract class BaseActivity
         // If private space feature flag is enabled, we should store the intent that launched docsUi
         // so that we can use this intent to get CrossProfileResolveInfo when ever we want to,
         // for example when ACTION_PROFILE_AVAILABLE intent is received
-        if (mUserManagerState != null) {
+        if (mUserManagerState != null && SdkLevel.isAtLeastS()) {
             mUserManagerState.setCurrentStateIntent(intent);
         }
         mSearchManager = new SearchViewManager(searchListener, queryInterceptor,
@@ -376,6 +381,7 @@ public abstract class BaseActivity
 
         // Base classes must update result in their onCreate.
         setResult(AppCompatActivity.RESULT_CANCELED);
+        updateRecentsSetting();
     }
 
     private NavigationViewManager getNavigationViewManager(Breadcrumb breadcrumb,
@@ -454,7 +460,6 @@ public abstract class BaseActivity
         mPreferencesMonitor.stop();
         mSortController.destroy();
         DocumentsApplication.invalidateUserManagerState(this);
-        DocumentsApplication.invalidateConfigStore();
         super.onDestroy();
     }
 
@@ -1045,5 +1050,29 @@ public abstract class BaseActivity
          * @param uri Uri of the loaded directory. If recents, then null.
          */
         void onDirectoryLoaded(@Nullable Uri uri);
+    }
+
+    /**
+     * Updates the Recents preview settings based on presence of hidden profiles. Used not to leak
+     * Private profile existence when it was locked after the app was moved to the Recents.
+     */
+    public void updateRecentsSetting() {
+        if (!SdkLevel.isAtLeastV()) {
+            return;
+        }
+
+        if (mUserManagerState == null) {
+            Log.e(TAG, "Can't update Recents screenshot setting: User manager state is null.");
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(
+                    TAG,
+                    "Set recents screenshot to "
+                            + (!mUserManagerState.areHiddenInQuietModeProfilesPresent() ? "enabled"
+                            : "disabled"));
+        }
+        setRecentsScreenshotEnabled(!mUserManagerState.areHiddenInQuietModeProfilesPresent());
     }
 }

@@ -27,8 +27,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ext.SdkExtensions;
 import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -47,6 +50,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -78,6 +82,7 @@ import com.android.documentsui.roots.ProvidersAccess;
 import com.android.documentsui.roots.ProvidersCache;
 import com.android.documentsui.roots.RootsLoader;
 import com.android.documentsui.util.CrossProfileUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,6 +92,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Display list of known storage backend roots.
@@ -269,7 +275,8 @@ public class RootsFragment extends Fragment {
                 ResolveInfo crossProfileResolveInfo = null;
                 UserManagerState userManagerState = null;
                 if (state.supportsCrossProfile() && handlerAppIntent != null) {
-                    if (state.configStore.isPrivateSpaceInDocsUIEnabled()) {
+                    if (state.configStore.isPrivateSpaceInDocsUIEnabled()
+                            && SdkLevel.isAtLeastS()) {
                         userManagerState = DocumentsApplication.getUserManagerState(getContext());
                         Map<UserId, Boolean> canForwardToProfileIdMap =
                                 userManagerState.getCanForwardToProfileIdMap(handlerAppIntent);
@@ -335,7 +342,7 @@ public class RootsFragment extends Fragment {
             }
 
             private List<UserId> getUserIds() {
-                if (state.configStore.isPrivateSpaceInDocsUIEnabled()) {
+                if (state.configStore.isPrivateSpaceInDocsUIEnabled() && SdkLevel.isAtLeastS()) {
                     return DocumentsApplication.getUserManagerState(getContext()).getUserIds();
                 }
                 return DocumentsApplication.getUserIdManager(getContext()).getUserIds();
@@ -462,7 +469,7 @@ public class RootsFragment extends Fragment {
         }
 
         List<Item> presentableList =
-                state.configStore.isPrivateSpaceInDocsUIEnabled()
+                state.configStore.isPrivateSpaceInDocsUIEnabled() && SdkLevel.isAtLeastS()
                         ? getPresentableListPrivateSpaceEnabled(
                         context, state, rootListAllUsers, userIds, userManagerState) :
                         getPresentableListPrivateSpaceDisabled(context, state, rootList,
@@ -471,6 +478,7 @@ public class RootsFragment extends Fragment {
         return result;
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private List<Item> getPresentableListPrivateSpaceEnabled(Context context, State state,
             List<List<Item>> rootListAllUsers, List<UserId> userIds,
             UserManagerState userManagerState) {
@@ -516,6 +524,25 @@ public class RootsFragment extends Fragment {
             final List<ResolveInfo> infos = pm.queryIntentActivities(
                     handlerAppIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
+            // In addition to hiding DocumentsUI from possible handler apps, the Android
+            // Photopicker should also be hidden. ACTION_PICK_IMAGES is used to identify
+            // the Photopicker package since that is the primary API.
+            List<ResolveInfo> photopickerActivities;
+            List<String> photopickerPackages;
+
+            if (SdkLevel.isAtLeastR()
+                    && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2) {
+                photopickerActivities = pm.queryIntentActivities(
+                        new Intent(MediaStore.ACTION_PICK_IMAGES),
+                        PackageManager.MATCH_DEFAULT_ONLY);
+                photopickerPackages = photopickerActivities.stream()
+                        .map(info -> info.activityInfo.packageName)
+                .collect(Collectors.toList());
+            } else {
+                photopickerActivities = Collections.emptyList();
+                photopickerPackages = Collections.emptyList();
+            }
+
             // Omit ourselves and maybe calling package from the list
             for (ResolveInfo info : infos) {
                 if (!info.activityInfo.exported) {
@@ -526,6 +553,13 @@ public class RootsFragment extends Fragment {
                 }
 
                 final String packageName = info.activityInfo.packageName;
+
+                // If the package name for the activity is in the list of Photopicker
+                // activities, exclude it.
+                if (photopickerPackages.contains(packageName)) {
+                    continue;
+                }
+
                 if (!myPackageName.equals(packageName)
                         && !TextUtils.equals(excludePackage, packageName)) {
                     UserPackage userPackage = new UserPackage(userId, packageName);

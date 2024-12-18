@@ -19,13 +19,12 @@ package {
 java_defaults {
     name: "DocumentsUITests-defaults",
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     static_libs: [
-        "DocumentsUI-lib",
         "androidx.test.rules",
         "androidx.test.espresso.core",
         "androidx.test.ext.truth",
@@ -43,9 +42,9 @@ android_library {
     ],
     resource_dirs: [],
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
         "DocumentsUI-lib",
     ],
 
@@ -70,6 +69,10 @@ android_library {
         "unit/**/*.java",
     ],
 
+    libs: [
+        "DocumentsUI-lib",
+    ],
+
     resource_dirs: [
         "res",
     ],
@@ -88,6 +91,10 @@ android_library {
         "common/**/*.java",
         "functional/**/*.java",
         "unit/**/*.java",
+    ],
+
+    libs: [
+        "DocumentsUI-lib",
     ],
 
     asset_dirs: [
